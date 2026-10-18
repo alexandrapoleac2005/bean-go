@@ -33,6 +33,6 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @Column(name = "total_points", columnDefinition = "integer default 0")
+    @Column(name = "total_points", columnDefinition = "integer default 0", nullable = false)
     private Integer totalPoints = 0;
 }
