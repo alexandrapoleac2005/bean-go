@@ -1,0 +1,34 @@
+package com.cafe.bean_go.entities;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.cglib.core.Local;
+
+import java.time.LocalTime;
+
+@Entity
+@Table(name = "operating_hours")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class OperatingHours {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="coffee_shop_id",nullable = false)
+    private CoffeeShop coffeeShop;
+
+    @Column(name="day_of_week",nullable = false)
+    private String dayOfWeek;
+
+    @Column(name="open_time",nullable = false)
+    private LocalTime openTime;
+
+    @Column(name="close_time",nullable = false)
+    private LocalTime closeTime;
+}
