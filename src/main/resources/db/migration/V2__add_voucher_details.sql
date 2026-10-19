@@ -1,0 +1,3 @@
+ALTER TABLE vouchers
+ADD COLUMN discount_percentage INT DEFAULT 10 NOT NULL,
+ADD COLUMN expires_at TIMESTAMP;
