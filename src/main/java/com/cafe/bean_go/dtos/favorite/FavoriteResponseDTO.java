@@ -1,12 +1,14 @@
 package com.cafe.bean_go.dtos.favorite;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @Builder
+@AllArgsConstructor
 public class FavoriteResponseDTO {
 
     private Long id;

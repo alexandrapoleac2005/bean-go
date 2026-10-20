@@ -1,12 +1,11 @@
 package com.cafe.bean_go.dtos.user;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @Builder
+@AllArgsConstructor
 public class UserProfileResponseDTO {
 
     private Long id;
