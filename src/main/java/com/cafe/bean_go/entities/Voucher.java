@@ -32,7 +32,13 @@ public class Voucher {
     @Column(nullable = false)
     private VoucherStatus status;
 
+    @Column(name = "discount_percentage", nullable = false)
+    private Integer discountPercentage = 10;
+
     @CreationTimestamp
     @Column(name = "generated_at", updatable = false)
     private LocalDateTime generatedAt;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
 }
