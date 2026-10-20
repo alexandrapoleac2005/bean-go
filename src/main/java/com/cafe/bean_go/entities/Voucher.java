@@ -25,8 +25,8 @@ public class Voucher {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coffee_shop_id_where_used")
-    private CoffeeShop coffeeShopWhereUsed;
+    @JoinColumn(name = "coffee_shop_id")
+    private CoffeeShop coffeeShop;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
