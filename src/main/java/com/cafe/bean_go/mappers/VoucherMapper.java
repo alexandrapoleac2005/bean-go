@@ -8,6 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface VoucherMapper {
 
-    @Mapping(source = "coffeeShopWhereUsed.name", target = "coffeeShopName")
+    @Mapping(source = "coffeeShop.name", target = "coffeeShopName")
     VoucherResponseDTO toResponseDto(Voucher voucher);
 }
