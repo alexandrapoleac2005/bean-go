@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MenuItemDTO {
+public class MenuItemResponseDTO {
     private Long id;
     private String category;
     private String name;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
@@ -23,8 +24,9 @@ public class OperatingHours {
     @JoinColumn(name = "coffee_shop_id", nullable = false)
     private CoffeeShop coffeeShop;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "day_of_week", nullable = false)
-    private String dayOfWeek;
+    private DayOfWeek dayOfWeek;
 
     @Column(name = "open_time", nullable = false)
     private LocalTime openTime;

@@ -1,10 +1,12 @@
 package com.cafe.bean_go.mappers;
 
-import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsDTO;
-import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryDTO;
-import com.cafe.bean_go.dtos.facility.FacilityDTO;
-import com.cafe.bean_go.dtos.menu.MenuItemDTO;
-import com.cafe.bean_go.dtos.schedule.OperatingHoursDTO;
+import org.locationtech.jts.geom.Point;
+import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
+import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
+import com.cafe.bean_go.dtos.facility.FacilityResponseDTO;
+import com.cafe.bean_go.dtos.menu.MenuItemResponseDTO;
+import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
+import com.cafe.bean_go.dtos.schedule.OperatingHoursResponseDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.Facility;
 import com.cafe.bean_go.entities.MenuItem;
@@ -13,23 +15,23 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.awt.*;
-
 @Mapper(componentModel = "spring")
 public interface CoffeeShopMapper {
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
     @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
-    CoffeeShopSummaryDTO toSummaryDto(CoffeeShop coffeeShop);
+    CoffeeShopSummaryResponseDTO toSummaryDto(CoffeeShop coffeeShop);
 
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
     @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
-    CoffeeShopDetailsDTO toDetailsDto(CoffeeShop coffeeShop);
+    @Mapping(source = "menuItems", target = "menu")
+    CoffeeShopDetailsResponseDTO toDetailsDto(CoffeeShop coffeeShop);
 
-    FacilityDTO toFacilityDto(Facility facility);
+    FacilityResponseDTO toFacilityDto(Facility facility);
 
-    MenuItemDTO toMenuItemDto(MenuItem menuItem);
+    MenuItemResponseDTO toMenuItemDto(MenuItem menuItem);
 
-    OperatingHoursDTO toOperatingHoursDto(OperatingHours operatingHours);
+    @Mapping(source = "operatingHours", target = "schedule")
+    OperatingHoursResponseDTO toOperatingHoursDto(OperatingHours operatingHours);
 
     @Named("getLatitude")
     default Double getLatitude(Point location) {
@@ -44,4 +46,6 @@ public interface CoffeeShopMapper {
             return null;
         return location.getX();
     }
+
+    MenuItem toMenuItemEntity(MenuItemRequestDTO menuItemRequestDTO);
 }
