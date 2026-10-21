@@ -1,6 +1,7 @@
 package com.cafe.bean_go.entities;
 
 import com.cafe.bean_go.entities.enums.Role;
+import com.cafe.bean_go.entities.enums.UserBadge;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,10 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @Column(name = "total_points", columnDefinition = "integer default 0", nullable = false)
-    private Integer totalPoints = 0;
+    @Column(name = "lifetime_points", nullable = false)
+    private Integer lifetimePoints = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserBadge badge = UserBadge.ROOKIE;
 }

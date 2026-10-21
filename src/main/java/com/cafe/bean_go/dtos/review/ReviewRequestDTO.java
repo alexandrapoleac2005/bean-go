@@ -15,9 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReviewRequestDTO {
 
-    @NotNull(message = "The ID is mandatory")
-    private Long coffeeShopId;
-
     @NotNull(message = "Giving a rating is mandatory")
     @Min(value = 1, message = "The minimum rating is 1")
     @Max(value = 5, message = "The maximum rating is 5")

@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN lifetime_points INT DEFAULT 0 NOT NULL;

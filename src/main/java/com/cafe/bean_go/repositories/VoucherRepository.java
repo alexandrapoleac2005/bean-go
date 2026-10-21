@@ -13,4 +13,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     List<Voucher> findByUserId(Long userId);
 
     List<Voucher> findByUserIdAndStatus(Long userId, VoucherStatus status);
+
+    long countByUserIdAndCoffeeShopIdAndStatus(Long userId, Long coffeeShopId, VoucherStatus status); // Numar vouchere active per user la o cafenea
 }
