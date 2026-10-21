@@ -2,7 +2,7 @@ package com.cafe.bean_go.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.cglib.core.Local;
+
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;

@@ -24,13 +24,13 @@ public interface CoffeeShopMapper {
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
     @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
     @Mapping(source = "menuItems", target = "menu")
+    @Mapping(source = "operatingHours", target = "schedule")
     CoffeeShopDetailsResponseDTO toDetailsDto(CoffeeShop coffeeShop);
 
     FacilityResponseDTO toFacilityDto(Facility facility);
 
     MenuItemResponseDTO toMenuItemDto(MenuItem menuItem);
 
-    @Mapping(source = "operatingHours", target = "schedule")
     OperatingHoursResponseDTO toOperatingHoursDto(OperatingHours operatingHours);
 
     @Named("getLatitude")

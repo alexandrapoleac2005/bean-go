@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import org.locationtech.jts.geom.Point;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -54,5 +55,9 @@ public class CoffeeShop {
     @Builder.Default
     @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> menuItems = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OperatingHours> operatingHours = new ArrayList<>();
 }
 
