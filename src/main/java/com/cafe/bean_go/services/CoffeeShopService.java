@@ -18,16 +18,14 @@ public class CoffeeShopService {
     private final CoffeeShopRepository coffeeShopRepository;
     private final CoffeeShopMapper coffeeShopMapper;
 
-    public List<CoffeeShopSummaryDTO> getAllCoffeeShopsSummary()
-    {
-        List<CoffeeShop> coffeeShops= coffeeShopRepository.findAll();
+    public List<CoffeeShopSummaryDTO> getAllCoffeeShopsSummary() {
+        List<CoffeeShop> coffeeShops = coffeeShopRepository.findAll();
 
         return coffeeShops.stream().map(coffeeShopMapper::toSummaryDto).collect(Collectors.toList());
     }
 
-    public CoffeeShopDetailsDTO getCoffeeShopById(Long id)
-    {
-        CoffeeShop coffeeShop= coffeeShopRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Cafeneaua cu ID-ul " + id + " nu a fost găsită!"));
+    public CoffeeShopDetailsDTO getCoffeeShopById(Long id) {
+        CoffeeShop coffeeShop = coffeeShopRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID \" + id + \" not found!"));
 
         return coffeeShopMapper.toDetailsDto(coffeeShop);
     }

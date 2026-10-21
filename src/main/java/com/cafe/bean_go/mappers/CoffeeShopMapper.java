@@ -17,8 +17,8 @@ import java.awt.*;
 
 @Mapper(componentModel = "spring")
 public interface CoffeeShopMapper {
-    @Mapping(source="location",target="latitude",qualifiedByName ="getLatitude")
-    @Mapping(source="location", target = "longitude", qualifiedByName = "getLongitude")
+    @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
+    @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
     CoffeeShopSummaryDTO toSummaryDto(CoffeeShop coffeeShop);
 
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
@@ -26,21 +26,21 @@ public interface CoffeeShopMapper {
     CoffeeShopDetailsDTO toDetailsDto(CoffeeShop coffeeShop);
 
     FacilityDTO toFacilityDto(Facility facility);
+
     MenuItemDTO toMenuItemDto(MenuItem menuItem);
+
     OperatingHoursDTO toOperatingHoursDto(OperatingHours operatingHours);
 
     @Named("getLatitude")
-    default Double getLatitude(Point location)
-    {
-        if(location==null)
+    default Double getLatitude(Point location) {
+        if (location == null)
             return null;
         return location.getY();
     }
 
     @Named("getLongitude")
-    default Double getLongitude(Point location)
-    {
-        if(location==null)
+    default Double getLongitude(Point location) {
+        if (location == null)
             return null;
         return location.getX();
     }

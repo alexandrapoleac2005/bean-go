@@ -20,15 +20,15 @@ public class OperatingHours {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="coffee_shop_id",nullable = false)
+    @JoinColumn(name = "coffee_shop_id", nullable = false)
     private CoffeeShop coffeeShop;
 
-    @Column(name="day_of_week",nullable = false)
+    @Column(name = "day_of_week", nullable = false)
     private String dayOfWeek;
 
-    @Column(name="open_time",nullable = false)
+    @Column(name = "open_time", nullable = false)
     private LocalTime openTime;
 
-    @Column(name="close_time",nullable = false)
+    @Column(name = "close_time", nullable = false)
     private LocalTime closeTime;
 }

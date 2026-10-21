@@ -20,14 +20,12 @@ public class CoffeeShopController {
     private final CoffeeShopService coffeeShopService;
 
     @GetMapping
-    public ResponseEntity<List<CoffeeShopSummaryDTO>> getAllCoffeeShops()
-    {
+    public ResponseEntity<List<CoffeeShopSummaryDTO>> getAllCoffeeShops() {
         return ResponseEntity.ok(coffeeShopService.getAllCoffeeShopsSummary());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CoffeeShopDetailsDTO> getCoffeeShopById(@PathVariable Long id)
-    {
+    public ResponseEntity<CoffeeShopDetailsDTO> getCoffeeShopById(@PathVariable Long id) {
         return ResponseEntity.ok(coffeeShopService.getCoffeeShopById(id));
     }
 
