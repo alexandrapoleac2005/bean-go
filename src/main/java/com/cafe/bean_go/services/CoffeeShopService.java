@@ -3,6 +3,7 @@ package com.cafe.bean_go.services;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
+import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
 import com.cafe.bean_go.repositories.CoffeeShopRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class CoffeeShopService {
 
     public CoffeeShopDetailsDTO getCoffeeShopById(Long id)
     {
-        CoffeeShop coffeeShop= coffeeShopRepository.findById(id).orElseThrow(()->new RuntimeException("Cafeneaua cu ID-ul " + id + " nu a fost găsită!"));
+        CoffeeShop coffeeShop= coffeeShopRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Cafeneaua cu ID-ul " + id + " nu a fost găsită!"));
 
         return coffeeShopMapper.toDetailsDto(coffeeShop);
     }
