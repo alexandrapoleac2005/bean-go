@@ -1,6 +1,7 @@
 package com.cafe.bean_go.services;
 
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
+import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopRequestDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
@@ -9,9 +10,12 @@ import com.cafe.bean_go.exceptions.CoffeeShopOwnershipException;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
 import com.cafe.bean_go.repositories.CoffeeShopRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,12 +26,17 @@ public class CoffeeShopService {
     private final CoffeeShopRepository coffeeShopRepository;
     private final CoffeeShopMapper coffeeShopMapper;
 
-    public List<CoffeeShopSummaryResponseDTO> getAllCoffeeShopsSummary() {
-        List<CoffeeShop> coffeeShops = coffeeShopRepository.findByIsApprovedTrue();
+    @Transactional(readOnly = true)
+    public Page<CoffeeShopSummaryResponseDTO> getAllCoffeeShopsSummary(int page, int size) {
 
-        return coffeeShops.stream().map(coffeeShopMapper::toSummaryDto).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CoffeeShop> coffeeShopPage = coffeeShopRepository.findByIsApprovedTrue(pageable);
+
+        return coffeeShopPage.map(coffeeShopMapper::toSummaryDto);
     }
 
+    @Transactional(readOnly = true)
     public CoffeeShopDetailsResponseDTO getCoffeeShopById(Long id) {
         CoffeeShop coffeeShop = coffeeShopRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + id + " not found!"));
 
@@ -92,4 +101,35 @@ public class CoffeeShopService {
         shop.getMenuItems().remove(itemToRemove);
     }
 
+    @Transactional(readOnly = true)
+    public List<CoffeeShopSummaryResponseDTO> getNearbyCoffeeShops(double lat, double lng, double radiusInMeters) {
+
+        List<CoffeeShop> nearbyShops = coffeeShopRepository.findNearbyCoffeeShops(lat, lng, radiusInMeters);
+
+        return nearbyShops.stream()
+                .map(coffeeShopMapper::toSummaryDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void approveCoffeeShop(Long coffeeShopId) {
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+
+        if (Boolean.TRUE.equals(shop.getIsApproved())) {
+            throw new IllegalStateException("Coffee shop is already approved!");
+        }
+
+        shop.setIsApproved(true);
+    }
+
+    @Transactional
+    public CoffeeShopDetailsResponseDTO createCoffeeShop(CoffeeShopRequestDTO requestDTO) {
+
+        CoffeeShop newShop = coffeeShopMapper.toEntity(requestDTO);
+
+        CoffeeShop savedShop = coffeeShopRepository.save(newShop);
+
+        return coffeeShopMapper.toDetailsDto(savedShop);
+    }
 }

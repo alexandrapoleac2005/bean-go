@@ -1,5 +1,8 @@
 package com.cafe.bean_go.mappers;
 
+import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopRequestDTO;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
@@ -11,12 +14,18 @@ import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.Facility;
 import com.cafe.bean_go.entities.MenuItem;
 import com.cafe.bean_go.entities.OperatingHours;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface CoffeeShopMapper {
+
+    @Mapping(target = "location", expression = "java(toPoint(requestDTO.getLat(), requestDTO.getLng()))")
+    @Mapping(target = "isApproved", constant = "false")
+    CoffeeShop toEntity(CoffeeShopRequestDTO requestDTO);
+
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
     @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
     CoffeeShopSummaryResponseDTO toSummaryDto(CoffeeShop coffeeShop);
@@ -48,4 +57,16 @@ public interface CoffeeShopMapper {
     }
 
     MenuItem toMenuItemEntity(MenuItemRequestDTO menuItemRequestDTO);
+
+    @Named("toPoint")
+    default Point toPoint(Double lat, Double lng) {
+
+        if (lat == null || lng == null) {
+            return null;
+        }
+
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+        return geometryFactory.createPoint(new Coordinate(lng, lat));
+    }
 }

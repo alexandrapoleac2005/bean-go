@@ -3,6 +3,8 @@ package com.cafe.bean_go.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
@@ -42,6 +44,12 @@ public class CoffeeShop {
     @Column(name = "is_approved")
     private Boolean isApproved;
 
+    @Column(name = "contact_phone", length = 20)
+    private String contactPhone;
+
+    @Column(name = "contact_email")
+    private String contactEmail;
+
     @ManyToMany
     @JoinTable(
             name = "coffee_shop_facilities",
@@ -50,6 +58,7 @@ public class CoffeeShop {
     )
 
     @Builder.Default
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Facility> facilities = new HashSet<>();
 
     @Builder.Default
