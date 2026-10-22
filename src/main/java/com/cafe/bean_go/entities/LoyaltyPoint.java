@@ -26,6 +26,7 @@ public class LoyaltyPoint {
     @JoinColumn(name = "coffee_shop_id", nullable = false)
     private CoffeeShop coffeeShop;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer points = 0;
 }
