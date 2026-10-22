@@ -5,6 +5,7 @@ import com.cafe.bean_go.dtos.review.ReviewResponseDTO;
 import com.cafe.bean_go.services.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,15 +29,23 @@ public class ReviewController {
     }
 
     @GetMapping("/coffee-shops/{coffeeShopId}/reviews")
-    public ResponseEntity<List<ReviewResponseDTO>> getCoffeeShopReviews(@PathVariable Long coffeeShopId){
-        List<ReviewResponseDTO> reviewResponseDTOList = reviewService.getCoffeeShopReviews(coffeeShopId);
-        return ResponseEntity.ok(reviewResponseDTOList);
+    public ResponseEntity<Page<ReviewResponseDTO>> getCoffeeShopReviews(
+            @PathVariable Long coffeeShopId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<ReviewResponseDTO> reviews = reviewService.getCoffeeShopReviews(coffeeShopId, page, size);
+        return ResponseEntity.ok(reviews);
     }
 
     @GetMapping("/users/{userId}/reviews")
-    public ResponseEntity<List<ReviewResponseDTO>> getUserReviews(@PathVariable Long userId){
-        List<ReviewResponseDTO> reviewResponseDTOList = reviewService.getUserReviews(userId);
-        return ResponseEntity.ok(reviewResponseDTOList);
+    public ResponseEntity<Page<ReviewResponseDTO>> getUserReviews(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<ReviewResponseDTO> reviews = reviewService.getUserReviews(userId, page, size);
+        return ResponseEntity.ok(reviews);
     }
 
     @DeleteMapping("/reviews/{reviewId}")

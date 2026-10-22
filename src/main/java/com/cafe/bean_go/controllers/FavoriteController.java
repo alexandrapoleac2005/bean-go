@@ -3,6 +3,7 @@ package com.cafe.bean_go.controllers;
 import com.cafe.bean_go.dtos.favorite.FavoriteResponseDTO;
 import com.cafe.bean_go.services.FavoriteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,13 @@ public class FavoriteController {
     private final FavoriteService favoriteService;
 
     @GetMapping("/users/{userId}/favorites")
-    public ResponseEntity<List<FavoriteResponseDTO>> getUserFavorites(@PathVariable Long userId){
-        List<FavoriteResponseDTO> favoriteResponseDTOList = favoriteService.getUserFavorites(userId);
-        return ResponseEntity.ok(favoriteResponseDTOList);
+    public ResponseEntity<Page<FavoriteResponseDTO>> getUserFavorites(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<FavoriteResponseDTO> favorites = favoriteService.getUserFavorites(userId, page, size);
+        return ResponseEntity.ok(favorites);
     }
 
     @PostMapping("/users/{userId}/favorites/{coffeeShopId}")
