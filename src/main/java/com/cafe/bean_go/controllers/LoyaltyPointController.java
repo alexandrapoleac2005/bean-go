@@ -23,7 +23,7 @@ public class LoyaltyPointController {
         return ResponseEntity.ok(wallets);
     }
 
-    @PostMapping("/loyalty-points/transaction")
+    @PostMapping("/loyalty-points/transactions")
     public ResponseEntity<Void> addPointsAfterPurchase(@Valid @RequestBody LoyaltyPointRequestDTO requestDTO) {
         loyaltyPointService.addPointsAfterPurchase(
                 requestDTO.getUserId(),
