@@ -27,7 +27,7 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/coffe-shops/{coffeeShopId}/reviews")
+    @GetMapping("/coffee-shops/{coffeeShopId}/reviews")
     public ResponseEntity<List<ReviewResponseDTO>> getCoffeeShopReviews(@PathVariable Long coffeeShopId){
         List<ReviewResponseDTO> reviewResponseDTOList = reviewService.getCoffeeShopReviews(coffeeShopId);
         return ResponseEntity.ok(reviewResponseDTOList);

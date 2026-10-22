@@ -37,6 +37,7 @@ public class LoyaltyPointService {
     @Value("${beango.loyalty.max-active-vouchers}")
     private int maxActiveVouchers;
 
+    @Transactional(readOnly = true)
     public List<LoyaltyPointResponseDTO> getUserWallets(Long userId){
         return loyaltyPointRepository.findAllByUserId(userId)
                 .stream()
