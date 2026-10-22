@@ -5,6 +5,7 @@ import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.MenuItem;
+import com.cafe.bean_go.exceptions.CoffeeShopOwnershipException;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
 import com.cafe.bean_go.repositories.CoffeeShopRepository;
@@ -34,9 +35,12 @@ public class CoffeeShopService {
     }
 
     @Transactional
-    public CoffeeShopDetailsResponseDTO addMenuItemToCoffeeShop(Long coffeeShopId, MenuItemRequestDTO itemDto) {
+    public CoffeeShopDetailsResponseDTO addMenuItemToCoffeeShop(Long coffeeShopId, Long loggedInUserId, MenuItemRequestDTO itemDto) {
         CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId).orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
 
+        if (!shop.getMerchant().getId().equals(loggedInUserId)) {
+            throw new CoffeeShopOwnershipException("You do not have permission to modify the menu of this coffee shop!");
+        }
         MenuItem newItem = coffeeShopMapper.toMenuItemEntity(itemDto);
 
         newItem.setCoffeeShop(shop);
@@ -48,15 +52,19 @@ public class CoffeeShopService {
     }
 
     @Transactional
-    public CoffeeShopDetailsResponseDTO updateMenuItem(Long coffeeShopId, Long itemId, MenuItemRequestDTO itemDto) {
+    public CoffeeShopDetailsResponseDTO updateMenuItem(Long coffeeShopId, Long loggedInUserId, Long itemId, MenuItemRequestDTO itemDto) {
 
         CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
 
+        if (!shop.getMerchant().getId().equals(loggedInUserId)) {
+            throw new CoffeeShopOwnershipException("You do not have permission to modify the menu of this coffee shop!");
+        }
+
         MenuItem itemToUpdate = shop.getMenuItems().stream()
-                .filter(item->item.getId().equals(itemId))
+                .filter(item -> item.getId().equals(itemId))
                 .findFirst()
-                .orElseThrow(()->new ResourceNotFoundException("Menu item with ID " + itemId + " not found in this coffee shop!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item with ID " + itemId + " not found in this coffee shop!"));
 
         itemToUpdate.setName(itemDto.getName());
         itemToUpdate.setCategory(itemDto.getCategory());
@@ -67,15 +75,19 @@ public class CoffeeShopService {
     }
 
     @Transactional
-    public void deleteMenuItem(Long coffeeShopId, Long itemId) {
+    public void deleteMenuItem(Long coffeeShopId, Long loggedInUserId, Long itemId) {
 
         CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
-                .orElseThrow(()-> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+
+        if (!shop.getMerchant().getId().equals(loggedInUserId)) {
+            throw new CoffeeShopOwnershipException("You do not have permission to modify the menu of this coffee shop!");
+        }
 
         MenuItem itemToRemove = shop.getMenuItems().stream()
-                .filter(item->item.getId().equals(itemId))
+                .filter(item -> item.getId().equals(itemId))
                 .findFirst()
-                .orElseThrow(()->new ResourceNotFoundException("Menu item with ID " + itemId + " not found in this coffee shop!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item with ID " + itemId + " not found in this coffee shop!"));
 
         shop.getMenuItems().remove(itemToRemove);
     }

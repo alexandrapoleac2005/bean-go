@@ -32,26 +32,29 @@ public class CoffeeShopController {
     @PostMapping("/{id}/menu")
     public ResponseEntity<CoffeeShopDetailsResponseDTO> addMenuItem(
             @PathVariable Long id,
+            @RequestParam Long merchantId,
             @Valid @RequestBody MenuItemRequestDTO itemDto) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(coffeeShopService.addMenuItemToCoffeeShop(id, itemDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(coffeeShopService.addMenuItemToCoffeeShop(id, merchantId, itemDto));
     }
 
     @PutMapping("/{coffeeShopId}/menu/{itemId}")
     public ResponseEntity<CoffeeShopDetailsResponseDTO> updateMenuItem(
             @PathVariable Long coffeeShopId,
             @PathVariable Long itemId,
+            @RequestParam Long merchantId,
             @Valid @RequestBody MenuItemRequestDTO itemDto) {
 
-        return ResponseEntity.ok(coffeeShopService.updateMenuItem(coffeeShopId, itemId, itemDto));
+        return ResponseEntity.ok(coffeeShopService.updateMenuItem(coffeeShopId, merchantId, itemId, itemDto));
     }
 
     @DeleteMapping("/{coffeeShopId}/menu/{itemId}")
     public ResponseEntity<Void> removeMenuItem(
             @PathVariable Long coffeeShopId,
-            @PathVariable Long itemId) {
+            @PathVariable Long itemId,
+            @RequestParam Long merchantId) {
 
-        coffeeShopService.deleteMenuItem(coffeeShopId, itemId);
+        coffeeShopService.deleteMenuItem(coffeeShopId, merchantId, itemId);
 
         return ResponseEntity.noContent().build();
     }
