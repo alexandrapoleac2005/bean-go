@@ -37,4 +37,24 @@ public class CoffeeShopController {
         return ResponseEntity.status(HttpStatus.CREATED).body(coffeeShopService.addMenuItemToCoffeeShop(id, itemDto));
     }
 
+    @PutMapping("/{coffeeShopId}/menu/{itemId}")
+    public ResponseEntity<CoffeeShopDetailsResponseDTO> updateMenuItem(
+            @PathVariable Long coffeeShopId,
+            @PathVariable Long itemId,
+            @Valid @RequestBody MenuItemRequestDTO itemDto) {
+
+        return ResponseEntity.ok(coffeeShopService.updateMenuItem(coffeeShopId, itemId, itemDto));
+    }
+
+    @DeleteMapping("/{coffeeShopId}/menu/{itemId}")
+    public ResponseEntity<Void> removeMenuItem(
+            @PathVariable Long coffeeShopId,
+            @PathVariable Long itemId) {
+
+        coffeeShopService.deleteMenuItem(coffeeShopId, itemId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

@@ -43,10 +43,41 @@ public class CoffeeShopService {
 
         shop.getMenuItems().add(newItem);
 
-        coffeeShopRepository.save(shop);
-
         return coffeeShopMapper.toDetailsDto(shop);
 
+    }
+
+    @Transactional
+    public CoffeeShopDetailsResponseDTO updateMenuItem(Long coffeeShopId, Long itemId, MenuItemRequestDTO itemDto) {
+
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+
+        MenuItem itemToUpdate = shop.getMenuItems().stream()
+                .filter(item->item.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(()->new ResourceNotFoundException("Menu item with ID " + itemId + " not found in this coffee shop!"));
+
+        itemToUpdate.setName(itemDto.getName());
+        itemToUpdate.setCategory(itemDto.getCategory());
+        itemToUpdate.setPrice(itemDto.getPrice());
+        itemToUpdate.setDescription(itemDto.getDescription());
+
+        return coffeeShopMapper.toDetailsDto(shop);
+    }
+
+    @Transactional
+    public void deleteMenuItem(Long coffeeShopId, Long itemId) {
+
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(()-> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+
+        MenuItem itemToRemove = shop.getMenuItems().stream()
+                .filter(item->item.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(()->new ResourceNotFoundException("Menu item with ID " + itemId + " not found in this coffee shop!"));
+
+        shop.getMenuItems().remove(itemToRemove);
     }
 
 }
