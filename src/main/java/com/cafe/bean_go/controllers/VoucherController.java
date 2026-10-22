@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class VoucherController {
 
@@ -21,7 +21,7 @@ public class VoucherController {
         return ResponseEntity.ok(voucherResponseDTOList);
     }
 
-    @PatchMapping("/vouchers/{voucherId}/use")
+    @PatchMapping("/vouchers/{voucherId}")
     public ResponseEntity<Void> useVoucher(@PathVariable Long voucherId, @RequestParam Long userId) {
         voucherService.useVoucher(voucherId, userId);
         return ResponseEntity.noContent().build();

@@ -46,21 +46,21 @@ public class LoyaltyPointService {
     }
 
     @Transactional
-    public void addPointsAfterPurchase(Long userId, Long coffeeShopId, int pointsToAdd){
+    public void addPointsAfterPurchase(Long userId, Long coffeeShopId, int pointsToAdd) {
         userService.addLifetimePoints(userId, pointsToAdd);
-
         LoyaltyPoint wallet = loyaltyPointRepository.findByUserIdAndCoffeeShopId(userId, coffeeShopId)
                 .orElseGet(() -> createNewWallet(userId, coffeeShopId));
 
         wallet.setPoints(wallet.getPoints() + pointsToAdd);
+        long activeVouchersCount = voucherRepository.countByUserIdAndCoffeeShopIdAndStatus(
+                userId, coffeeShopId, VoucherStatus.ACTIVE);
 
-        if(wallet.getPoints() >= pointsForVoucher){
-            long activeVouchersCount = voucherRepository.countByUserIdAndCoffeeShopIdAndStatus(userId, coffeeShopId, VoucherStatus.ACTIVE);
-            if(activeVouchersCount < maxActiveVouchers){
-                generateVoucher(wallet.getUser(), wallet.getCoffeeShop());
-                wallet.setPoints(wallet.getPoints() - pointsForVoucher);
-            }
+        while (wallet.getPoints() >= pointsForVoucher && activeVouchersCount < maxActiveVouchers) {
+            generateVoucher(wallet.getUser(), wallet.getCoffeeShop());
+            wallet.setPoints(wallet.getPoints() - pointsForVoucher);
+            activeVouchersCount++;
         }
+
         loyaltyPointRepository.save(wallet);
     }
 

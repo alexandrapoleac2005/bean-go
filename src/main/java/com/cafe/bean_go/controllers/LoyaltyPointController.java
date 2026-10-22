@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class LoyaltyPointController {
 
@@ -23,7 +23,7 @@ public class LoyaltyPointController {
         return ResponseEntity.ok(wallets);
     }
 
-    @PostMapping("/loyalty-points/purchase")
+    @PostMapping("/loyalty-points/transaction")
     public ResponseEntity<Void> addPointsAfterPurchase(@Valid @RequestBody LoyaltyPointRequestDTO requestDTO) {
         loyaltyPointService.addPointsAfterPurchase(
                 requestDTO.getUserId(),
