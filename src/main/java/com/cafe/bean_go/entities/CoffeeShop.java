@@ -3,9 +3,13 @@ package com.cafe.bean_go.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.awt.*;
+import org.locationtech.jts.geom.Point;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 
 @Entity
 @Table(name = "coffee_shops")
@@ -44,6 +48,16 @@ public class CoffeeShop {
             joinColumns = @JoinColumn(name = "coffee_shop_id"),
             inverseJoinColumns = @JoinColumn(name = "facility_id")
     )
+
+    @Builder.Default
     private Set<Facility> facilities = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MenuItem> menuItems = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OperatingHours> operatingHours = new ArrayList<>();
 }
 
