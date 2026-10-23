@@ -4,6 +4,9 @@ import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopRequestDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
+import com.cafe.bean_go.dtos.schedule.OperatingHoursRequestDTO;
+import com.cafe.bean_go.dtos.schedule.OperatingHoursResponseDTO;
+import com.cafe.bean_go.entities.OperatingHours;
 import com.cafe.bean_go.services.CoffeeShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -88,5 +91,16 @@ public class CoffeeShopController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdShop);
     }
+
+    @PutMapping("/{id}/schedule")
+    public ResponseEntity<List<OperatingHoursResponseDTO>> updateOperatingHours(
+            @PathVariable Long id,
+            @Valid @RequestBody List<OperatingHoursRequestDTO> scheduleRequests) {
+
+        List<OperatingHoursResponseDTO> updateSchedule = coffeeShopService.updateOperatingHours(id, scheduleRequests);
+
+        return ResponseEntity.ok(updateSchedule);
+    }
+
 
 }

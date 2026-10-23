@@ -68,5 +68,38 @@ public class CoffeeShop {
     @Builder.Default
     @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OperatingHours> operatingHours = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+
+    public void addReview(Review review) {
+        reviews.add(review);
+        review.setCoffeeShop(this);
+        updateAverageRating();
+    }
+
+    public void removeReview(Review review) {
+        reviews.remove(review);
+        review.setCoffeeShop(null);
+        updateAverageRating();
+    }
+
+    private void updateAverageRating() {
+        if (reviews.isEmpty()) {
+            this.averageRating = 0.0;
+            return;
+        }
+
+        double sum = reviews.stream()
+                .mapToDouble(Review::getRating)
+                .sum();
+
+        this.averageRating = Math.round((sum / reviews.size()) * 10.0) / 10.0;
+    }
+
 }
 

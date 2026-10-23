@@ -4,8 +4,11 @@ import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopRequestDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
+import com.cafe.bean_go.dtos.schedule.OperatingHoursRequestDTO;
+import com.cafe.bean_go.dtos.schedule.OperatingHoursResponseDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.MenuItem;
+import com.cafe.bean_go.entities.OperatingHours;
 import com.cafe.bean_go.exceptions.CoffeeShopOwnershipException;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
@@ -131,5 +134,29 @@ public class CoffeeShopService {
         CoffeeShop savedShop = coffeeShopRepository.save(newShop);
 
         return coffeeShopMapper.toDetailsDto(savedShop);
+    }
+
+    @Transactional
+    public List<OperatingHoursResponseDTO> updateOperatingHours(Long coffeeShopId, List<OperatingHoursRequestDTO> scheduleRequests) {
+
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop not found with id: " + coffeeShopId));
+
+        shop.getOperatingHours().clear();
+
+        List<OperatingHours> newSchedule = scheduleRequests.stream()
+                .map(dto -> {
+                    OperatingHours hours = coffeeShopMapper.toOperatingHoursEntity(dto);
+                    hours.setCoffeeShop(shop);
+                    return hours;
+                })
+                .toList();
+
+        shop.getOperatingHours().addAll(newSchedule);
+
+        return shop.getOperatingHours().stream()
+                .map(coffeeShopMapper::toOperatingHoursDto)
+                .toList();
+
     }
 }

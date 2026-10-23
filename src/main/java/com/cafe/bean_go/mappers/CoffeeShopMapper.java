@@ -1,6 +1,7 @@
 package com.cafe.bean_go.mappers;
 
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopRequestDTO;
+import com.cafe.bean_go.dtos.schedule.OperatingHoursRequestDTO;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -41,6 +42,8 @@ public interface CoffeeShopMapper {
     MenuItemResponseDTO toMenuItemDto(MenuItem menuItem);
 
     OperatingHoursResponseDTO toOperatingHoursDto(OperatingHours operatingHours);
+
+    OperatingHours toOperatingHoursEntity(OperatingHoursRequestDTO dto);
 
     @Named("getLatitude")
     default Double getLatitude(Point location) {

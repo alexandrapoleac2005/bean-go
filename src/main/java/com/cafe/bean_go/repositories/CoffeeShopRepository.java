@@ -3,12 +3,14 @@ package com.cafe.bean_go.repositories;
 import com.cafe.bean_go.entities.CoffeeShop;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
@@ -25,5 +27,8 @@ public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
     );
 
     List<CoffeeShop> findByMerchantId(Long merchantId);
+
+    @EntityGraph(attributePaths = {"menuItems", "operatingHours", "facilities"})
+    Optional<CoffeeShop> findById(Long id);
 
 }

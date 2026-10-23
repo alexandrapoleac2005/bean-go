@@ -43,7 +43,8 @@ public class ReviewService {
 
         Review review = reviewMapper.toEntity(reviewRequestDTO);
         review.setUser(user);
-        review.setCoffeeShop(coffeeShop);
+
+        coffeeShop.addReview(review);
 
         reviewRepository.save(review);
     }
@@ -69,6 +70,9 @@ public class ReviewService {
         if (!review.getUser().getId().equals(userId)) {
             throw new ReviewOwnershipException("You do not have permission to delete this review.");
         }
+
+        CoffeeShop shop = review.getCoffeeShop();
+        shop.removeReview(review);
 
         reviewRepository.delete(review);
     }
