@@ -13,6 +13,9 @@ import com.cafe.bean_go.repositories.CoffeeShopRepository;
 import com.cafe.bean_go.repositories.ReviewRepository;
 import com.cafe.bean_go.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,11 +51,12 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    public List<ReviewResponseDTO> getCoffeeShopReviews(Long coffeeShopId) {
-        return reviewRepository.findByCoffeeShopId(coffeeShopId)
-                .stream()
-                .map(reviewMapper::toResponseDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDTO> getCoffeeShopReviews(Long coffeeShopId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return reviewRepository.findByCoffeeShopId(coffeeShopId, pageable)
+                .map(reviewMapper::toResponseDto);
     }
 
     public Double getCoffeeShopAverageRating(Long coffeeShopId) {
@@ -73,10 +77,11 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    public List<ReviewResponseDTO> getUserReviews(Long userId) {
-        return reviewRepository.findByUserId(userId)
-                .stream()
-                .map(reviewMapper::toResponseDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDTO> getUserReviews(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return reviewRepository.findByUserId(userId, pageable)
+                .map(reviewMapper::toResponseDto);
     }
 }

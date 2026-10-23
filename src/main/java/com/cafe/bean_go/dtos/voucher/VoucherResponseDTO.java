@@ -16,4 +16,5 @@ public class VoucherResponseDTO {
     private VoucherStatus status;
     private LocalDateTime generatedAt;
     private LocalDateTime expiresAt;
+    private Integer discountPercentage;
 }

@@ -1,4 +1,4 @@
-package com.cafe.bean_go.dtos.exception_message;
+package com.cafe.bean_go.dtos.errors;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

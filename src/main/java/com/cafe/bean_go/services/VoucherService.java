@@ -24,6 +24,7 @@ public class VoucherService {
     private final VoucherRepository voucherRepository;
     private final VoucherMapper voucherMapper;
 
+    @Transactional(readOnly = true)
     public List<VoucherResponseDTO> getActiveVouchers(Long userId) {
         return voucherRepository.findByUserIdAndStatus(userId, VoucherStatus.ACTIVE)
                 .stream()
