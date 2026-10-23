@@ -34,9 +34,11 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Builder.Default
     @Column(name = "lifetime_points", nullable = false)
     private Integer lifetimePoints = 0;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserBadge badge = UserBadge.ROOKIE;
