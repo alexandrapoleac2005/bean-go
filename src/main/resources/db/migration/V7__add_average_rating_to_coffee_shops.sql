@@ -1,0 +1,2 @@
+ALTER TABLE coffee_shops
+ADD COLUMN average_rating DOUBLE PRECISION DEFAULT 0.0;
