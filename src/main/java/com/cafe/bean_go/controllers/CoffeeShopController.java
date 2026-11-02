@@ -7,12 +7,15 @@ import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
 import com.cafe.bean_go.dtos.schedule.OperatingHoursRequestDTO;
 import com.cafe.bean_go.dtos.schedule.OperatingHoursResponseDTO;
 import com.cafe.bean_go.entities.OperatingHours;
+import com.cafe.bean_go.security.CustomUserDetails;
 import com.cafe.bean_go.services.CoffeeShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,30 +40,36 @@ public class CoffeeShopController {
     }
 
     @PostMapping("/{id}/menu")
+    @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<CoffeeShopDetailsResponseDTO> addMenuItem(
             @PathVariable Long id,
-            @RequestParam Long merchantId,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
             @Valid @RequestBody MenuItemRequestDTO itemDto) {
 
+        Long merchantId = currentUser.getUser().getId();
         return ResponseEntity.status(HttpStatus.CREATED).body(coffeeShopService.addMenuItemToCoffeeShop(id, merchantId, itemDto));
     }
 
     @PutMapping("/{coffeeShopId}/menu/{itemId}")
+    @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<CoffeeShopDetailsResponseDTO> updateMenuItem(
             @PathVariable Long coffeeShopId,
             @PathVariable Long itemId,
-            @RequestParam Long merchantId,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
             @Valid @RequestBody MenuItemRequestDTO itemDto) {
 
+        Long merchantId = currentUser.getUser().getId();
         return ResponseEntity.ok(coffeeShopService.updateMenuItem(coffeeShopId, merchantId, itemId, itemDto));
     }
 
     @DeleteMapping("/{coffeeShopId}/menu/{itemId}")
+    @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<Void> removeMenuItem(
             @PathVariable Long coffeeShopId,
             @PathVariable Long itemId,
-            @RequestParam Long merchantId) {
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
 
+        Long merchantId = currentUser.getUser().getId();
         coffeeShopService.deleteMenuItem(coffeeShopId, merchantId, itemId);
 
         return ResponseEntity.noContent().build();
@@ -77,28 +86,34 @@ public class CoffeeShopController {
         return ResponseEntity.ok(shops);
     }
 
+
     @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> approveCoffeeShop(@PathVariable Long id) {
         coffeeShopService.approveCoffeeShop(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<CoffeeShopDetailsResponseDTO> createCoffeeShop(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
             @Valid @RequestBody CoffeeShopRequestDTO requestDTO) {
 
-        CoffeeShopDetailsResponseDTO createdShop = coffeeShopService.createCoffeeShop(requestDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdShop);
+            Long merchantId = currentUser.getUser().getId();
+            CoffeeShopDetailsResponseDTO createdShop = coffeeShopService.createCoffeeShop(merchantId, requestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdShop);
     }
 
     @PutMapping("/{id}/schedule")
+    @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<List<OperatingHoursResponseDTO>> updateOperatingHours(
             @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
             @Valid @RequestBody List<OperatingHoursRequestDTO> scheduleRequests) {
 
-        List<OperatingHoursResponseDTO> updateSchedule = coffeeShopService.updateOperatingHours(id, scheduleRequests);
-
+        Long merchantId = currentUser.getUser().getId();
+        List<OperatingHoursResponseDTO> updateSchedule = coffeeShopService.updateOperatingHours(id, merchantId, scheduleRequests);
         return ResponseEntity.ok(updateSchedule);
     }
 

@@ -15,12 +15,9 @@ import java.time.LocalTime;
 @Builder
 public class OperatingHoursResponseDTO {
 
-    @NotNull(message = "Day of week is required")
     private DayOfWeek dayOfWeek;
 
-    @NotNull(message = "Opening time is required")
     private LocalTime openTime;
 
-    @NotNull(message = "Closing time is required")
     private LocalTime closeTime;
 }

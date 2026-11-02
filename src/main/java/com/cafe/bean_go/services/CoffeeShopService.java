@@ -9,10 +9,12 @@ import com.cafe.bean_go.dtos.schedule.OperatingHoursResponseDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.MenuItem;
 import com.cafe.bean_go.entities.OperatingHours;
+import com.cafe.bean_go.entities.User;
 import com.cafe.bean_go.exceptions.CoffeeShopOwnershipException;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
 import com.cafe.bean_go.repositories.CoffeeShopRepository;
+import com.cafe.bean_go.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class CoffeeShopService {
     private final CoffeeShopRepository coffeeShopRepository;
     private final CoffeeShopMapper coffeeShopMapper;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<CoffeeShopSummaryResponseDTO> getAllCoffeeShopsSummary(int page, int size) {
@@ -54,10 +57,10 @@ public class CoffeeShopService {
             throw new CoffeeShopOwnershipException("You do not have permission to modify the menu of this coffee shop!");
         }
         MenuItem newItem = coffeeShopMapper.toMenuItemEntity(itemDto);
-
         newItem.setCoffeeShop(shop);
-
         shop.getMenuItems().add(newItem);
+
+        coffeeShopRepository.saveAndFlush(shop);
 
         return coffeeShopMapper.toDetailsDto(shop);
 
@@ -127,20 +130,27 @@ public class CoffeeShopService {
     }
 
     @Transactional
-    public CoffeeShopDetailsResponseDTO createCoffeeShop(CoffeeShopRequestDTO requestDTO) {
+    public CoffeeShopDetailsResponseDTO createCoffeeShop(Long merchantId, CoffeeShopRequestDTO requestDTO) {
+
+        User merchant = userRepository.findById(merchantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Merchant not found!"));
 
         CoffeeShop newShop = coffeeShopMapper.toEntity(requestDTO);
+        newShop.setMerchant(merchant);
 
         CoffeeShop savedShop = coffeeShopRepository.save(newShop);
-
         return coffeeShopMapper.toDetailsDto(savedShop);
     }
 
     @Transactional
-    public List<OperatingHoursResponseDTO> updateOperatingHours(Long coffeeShopId, List<OperatingHoursRequestDTO> scheduleRequests) {
+    public List<OperatingHoursResponseDTO> updateOperatingHours(Long coffeeShopId, Long merchantId, List<OperatingHoursRequestDTO> scheduleRequests) {
 
         CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coffee shop not found with id: " + coffeeShopId));
+
+        if (!shop.getMerchant().getId().equals(merchantId)) {
+            throw new CoffeeShopOwnershipException("You do not have permission to modify the schedule for this coffee shop!");
+        }
 
         shop.getOperatingHours().clear();
 

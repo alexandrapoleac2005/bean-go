@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             FavoriteOwnershipException.class,
             ReviewOwnershipException.class,
-            VoucherOwnershipException.class
+            VoucherOwnershipException.class,
+            CoffeeShopOwnershipException.class
     })
     public ResponseEntity<ApiErrorResponse> handleOwnershipExceptions(RuntimeException exception, HttpServletRequest httpServletRequest) {
 

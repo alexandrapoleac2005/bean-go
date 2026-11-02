@@ -1,5 +1,6 @@
 package com.cafe.bean_go.dtos.coffeeshop;
 
+import com.cafe.bean_go.validators.ValidPhoneNumber;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,7 @@ public class CoffeeShopRequestDTO {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    @Pattern(regexp = "^\\+?[0-9. ()-]{7,15}$", message = "Invalid phone number format")
+    @ValidPhoneNumber(message = "Invalid phone number format provided")
     private String contactPhone;
 
     @NotBlank(message = "Email is required")

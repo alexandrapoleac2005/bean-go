@@ -28,7 +28,7 @@ public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
 
     List<CoffeeShop> findByMerchantId(Long merchantId);
 
-    @EntityGraph(attributePaths = {"menuItems", "operatingHours", "facilities"})
+    @EntityGraph(attributePaths = {"facilities"})
     Optional<CoffeeShop> findById(Long id);
 
 }

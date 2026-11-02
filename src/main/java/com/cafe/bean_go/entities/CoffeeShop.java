@@ -3,6 +3,8 @@ package com.cafe.bean_go.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.locationtech.jts.geom.Point;
@@ -41,8 +43,9 @@ public class CoffeeShop {
     @Column(nullable = false)
     private String address;
 
+    @Builder.Default
     @Column(name = "is_approved")
-    private Boolean isApproved;
+    private Boolean isApproved = false;
 
     @Column(name = "contact_phone", length = 20)
     private String contactPhone;
@@ -62,10 +65,12 @@ public class CoffeeShop {
     private Set<Facility> facilities = new HashSet<>();
 
     @Builder.Default
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> menuItems = new ArrayList<>();
 
     @Builder.Default
+    @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OperatingHours> operatingHours = new ArrayList<>();
 
@@ -73,6 +78,7 @@ public class CoffeeShop {
     @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    @Builder.Default
     @Column(name = "average_rating")
     private Double averageRating = 0.0;
 
