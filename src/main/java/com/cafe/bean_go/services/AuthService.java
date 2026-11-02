@@ -26,6 +26,11 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponseDTO register(RegisterRequestDTO request) {
+
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new EmailAlreadyExistsException("The email is already used");
+        }
+
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -35,10 +40,6 @@ public class AuthService {
                 .lifetimePoints(0)
                 .badge(UserBadge.ROOKIE)
                 .build();
-
-        if(userRepository.existsByEmail(request.getEmail())){
-            throw new EmailAlreadyExistsException("The email is already used");
-        }
 
         userRepository.save(user);
 

@@ -42,4 +42,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserBadge badge = UserBadge.ROOKIE;
+
+    @PrePersist
+    @PreUpdate
+    public void updateBadgeAutomatically(){
+        this.badge = UserBadge.getBadgeForPoints(this.lifetimePoints);
+    }
 }

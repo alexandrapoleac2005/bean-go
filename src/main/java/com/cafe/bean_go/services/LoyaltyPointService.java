@@ -46,7 +46,15 @@ public class LoyaltyPointService {
     }
 
     @Transactional
-    public void addPointsAfterPurchase(Long userId, Long coffeeShopId, int pointsToAdd) {
+    public void addPointsAfterPurchase(Long loggedInMerchantId, Long userId, Long coffeeShopId, int pointsToAdd) {
+
+        CoffeeShop coffeeShop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop not found"));
+
+        if(!coffeeShop.getMerchant().getId().equals(loggedInMerchantId)){
+            throw new CoffeeShopOwnershipException("You can only give points for your own coffee shop!");
+        }
+
         userService.addLifetimePoints(userId, pointsToAdd);
         LoyaltyPoint wallet = loyaltyPointRepository.findByUserIdAndCoffeeShopId(userId, coffeeShopId)
                 .orElseGet(() -> createNewWallet(userId, coffeeShopId));

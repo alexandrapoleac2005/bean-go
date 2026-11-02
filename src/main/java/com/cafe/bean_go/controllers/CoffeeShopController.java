@@ -29,6 +29,7 @@ public class CoffeeShopController {
         return ResponseEntity.ok(coffeeShopService.getCoffeeShopById(id));
     }
 
+
     @PostMapping("/{id}/menu")
     public ResponseEntity<CoffeeShopDetailsResponseDTO> addMenuItem(
             @PathVariable Long id,

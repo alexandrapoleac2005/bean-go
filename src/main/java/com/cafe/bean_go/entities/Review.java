@@ -1,6 +1,8 @@
 package com.cafe.bean_go.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
@@ -31,6 +33,8 @@ public class Review {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private CoffeeShop coffeeShop;
 
+    @Min(1)
+    @Max(5)
     @Column(nullable = false)
     private Integer rating;
 

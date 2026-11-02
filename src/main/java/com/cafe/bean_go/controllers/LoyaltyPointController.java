@@ -2,10 +2,12 @@ package com.cafe.bean_go.controllers;
 
 import com.cafe.bean_go.dtos.loyalty.LoyaltyPointRequestDTO;
 import com.cafe.bean_go.dtos.loyalty.LoyaltyPointResponseDTO;
+import com.cafe.bean_go.security.CustomUserDetails;
 import com.cafe.bean_go.services.LoyaltyPointService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,12 @@ public class LoyaltyPointController {
     }
 
     @PostMapping("/loyalty-points/transactions")
-    public ResponseEntity<Void> addPointsAfterPurchase(@Valid @RequestBody LoyaltyPointRequestDTO requestDTO) {
+    public ResponseEntity<Void> addPointsAfterPurchase(@AuthenticationPrincipal CustomUserDetails currentUser, @Valid @RequestBody LoyaltyPointRequestDTO requestDTO) {
+
+        Long loggedInMerchantId = currentUser.getUser().getId();
+
         loyaltyPointService.addPointsAfterPurchase(
+                loggedInMerchantId,
                 requestDTO.getUserId(),
                 requestDTO.getCoffeeShopId(),
                 requestDTO.getPointsToAdd()

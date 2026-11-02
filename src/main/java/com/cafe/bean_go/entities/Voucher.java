@@ -36,6 +36,7 @@ public class Voucher {
     @Column(nullable = false)
     private VoucherStatus status;
 
+    @Builder.Default
     @Column(name = "discount_percentage", nullable = false)
     private Integer discountPercentage = 10;
 
