@@ -24,6 +24,8 @@ public class CoffeeShopDetailsResponseDTO {
     private String name;
     private String description;
     private String address;
+    private Double averageRating;
+    private Integer reviewCount;
 
     private Double latitude;
     private Double longitude;

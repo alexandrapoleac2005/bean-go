@@ -1,5 +1,6 @@
 package com.cafe.bean_go.dtos.schedule;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Builder
 public class OperatingHoursResponseDTO {
+
     private DayOfWeek dayOfWeek;
+
     private LocalTime openTime;
+
     private LocalTime closeTime;
 }

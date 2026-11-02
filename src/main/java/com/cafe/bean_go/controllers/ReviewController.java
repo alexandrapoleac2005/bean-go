@@ -54,7 +54,8 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/revievs/me")
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/reviews/me")
     public ResponseEntity<Page<ReviewResponseDTO>> getMyReviews(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam(defaultValue = "0") int page,
