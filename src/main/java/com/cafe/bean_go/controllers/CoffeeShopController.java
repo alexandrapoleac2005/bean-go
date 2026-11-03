@@ -10,6 +10,7 @@ import com.cafe.bean_go.entities.OperatingHours;
 import com.cafe.bean_go.security.CustomUserDetails;
 import com.cafe.bean_go.services.CoffeeShopService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,8 @@ public class CoffeeShopController {
 
     @GetMapping
     public ResponseEntity<Page<CoffeeShopSummaryResponseDTO>> getAllCoffeeShops(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
         return ResponseEntity.ok(coffeeShopService.getAllCoffeeShopsSummary(page, size));
     }
 
@@ -78,13 +79,11 @@ public class CoffeeShopController {
 
     @GetMapping("/nearby")
     public ResponseEntity<List<CoffeeShopSummaryResponseDTO>> getNearbyCoffeeShops(
-            @RequestParam double lat,
-            @RequestParam double lng,
+            @RequestParam @DecimalMin("-90") @DecimalMax("90") double lat,
+            @RequestParam @DecimalMin("-180") @DecimalMax("180") double lng,
             @RequestParam(defaultValue = "5000") double radius) {
-
-        List<CoffeeShopSummaryResponseDTO> shops = coffeeShopService.getNearbyCoffeeShops(lat, lng, radius);
-
-        return ResponseEntity.ok(shops);
+        double safeRadius = Math.min(Math.max(radius, 1), 50_000);
+        return ResponseEntity.ok(coffeeShopService.getNearbyCoffeeShops(lat, lng, safeRadius));
     }
 
 
@@ -111,12 +110,13 @@ public class CoffeeShopController {
     public ResponseEntity<List<OperatingHoursResponseDTO>> updateOperatingHours(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody List<OperatingHoursRequestDTO> scheduleRequests) {
+            @RequestBody @NotEmpty(message = "Schedule cannot be empty")
+            List<@NotNull(message = "Schedule entry cannot be null") @Valid OperatingHoursRequestDTO> scheduleRequests) {
 
         Long merchantId = currentUser.getUser().getId();
         List<OperatingHoursResponseDTO> updateSchedule = coffeeShopService.updateOperatingHours(id, merchantId, scheduleRequests);
         return ResponseEntity.ok(updateSchedule);
     }
-
+    
 
 }

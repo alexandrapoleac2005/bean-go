@@ -16,8 +16,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Voucher {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +33,10 @@ public class Voucher {
     @JoinColumn(name = "coffee_shop_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private CoffeeShop coffeeShop;
+
+    // Shown to the customer and entered by the merchant at redemption.
+    @Column(nullable = false, unique = true, length = 16)
+    private String code;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

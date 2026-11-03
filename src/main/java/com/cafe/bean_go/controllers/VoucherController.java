@@ -1,12 +1,14 @@
 package com.cafe.bean_go.controllers;
 
+import com.cafe.bean_go.dtos.voucher.VoucherRedeemRequestDTO;
 import com.cafe.bean_go.dtos.voucher.VoucherResponseDTO;
 import com.cafe.bean_go.security.CustomUserDetails;
 import com.cafe.bean_go.services.VoucherService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,11 +28,13 @@ public class VoucherController {
         return ResponseEntity.ok(voucherResponseDTOList);
     }
 
-    @PatchMapping("/vouchers/{voucherId}")
-    public ResponseEntity<Void> useVoucher(@PathVariable Long voucherId, @AuthenticationPrincipal CustomUserDetails currentUser) {
+    @PreAuthorize("hasRole('MERCHANT')")
+    @PostMapping("/vouchers/redeem")
+    public ResponseEntity<VoucherResponseDTO> redeemVoucher(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @Valid @RequestBody VoucherRedeemRequestDTO requestDTO) {
 
-        Long realUserId = currentUser.getUser().getId();
-        voucherService.useVoucher(voucherId, realUserId);
-        return ResponseEntity.noContent().build();
+        Long merchantId = currentUser.getUser().getId();
+        return ResponseEntity.ok(voucherService.redeemVoucher(requestDTO.getCode(), merchantId));
     }
 }

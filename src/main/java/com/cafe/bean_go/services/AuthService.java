@@ -13,8 +13,11 @@ import com.cafe.bean_go.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +30,15 @@ public class AuthService {
 
     public AuthResponseDTO register(RegisterRequestDTO request) {
 
-        if(userRepository.existsByEmail(request.getEmail())){
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        if(userRepository.existsByEmailIgnoreCase(email)){
             throw new EmailAlreadyExistsException("The email is already used");
         }
 
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
+                .email(email)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .lifetimePoints(0)
@@ -48,13 +52,12 @@ public class AuthService {
     }
 
     public AuthResponseDTO login(LoginRequestDTO request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        String jwtToken = jwtService.generateToken(new CustomUserDetails(user));
 
-        return AuthResponseDTO.builder().token(jwtToken).build();
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        return AuthResponseDTO.builder().token(jwtService.generateToken(principal)).build();
     }
 }

@@ -5,6 +5,7 @@ import lombok.*;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.locationtech.jts.geom.Point;
@@ -22,8 +23,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CoffeeShop {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -59,7 +62,6 @@ public class CoffeeShop {
             joinColumns = @JoinColumn(name = "coffee_shop_id"),
             inverseJoinColumns = @JoinColumn(name = "facility_id")
     )
-
     @Builder.Default
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Facility> facilities = new HashSet<>();
@@ -78,34 +80,14 @@ public class CoffeeShop {
     @OneToMany(mappedBy = "coffeeShop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    // Kept up to date by ReviewService using a database AVG query.
     @Builder.Default
     @Column(name = "average_rating")
     private Double averageRating = 0.0;
 
-    public void addReview(Review review) {
-        reviews.add(review);
-        review.setCoffeeShop(this);
-        updateAverageRating();
-    }
-
-    public void removeReview(Review review) {
-        reviews.remove(review);
-        review.setCoffeeShop(null);
-        updateAverageRating();
-    }
-
-    private void updateAverageRating() {
-        if (reviews.isEmpty()) {
-            this.averageRating = 0.0;
-            return;
-        }
-
-        double sum = reviews.stream()
-                .mapToDouble(Review::getRating)
-                .sum();
-
-        this.averageRating = Math.round((sum / reviews.size()) * 10.0) / 10.0;
-    }
+    // Computed by the database when the shop is loaded; not a real column.
+    @Formula("(SELECT COUNT(*) FROM reviews r WHERE r.coffee_shop_id = id)")
+    private Integer reviewCount;
 
 }
 

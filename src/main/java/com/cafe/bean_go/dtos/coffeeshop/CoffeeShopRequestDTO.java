@@ -18,6 +18,7 @@ public class CoffeeShopRequestDTO {
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     private String name;
 
+    @Size(max =  255)
     @NotBlank(message = "Address is required")
     private String address;
 
@@ -27,6 +28,7 @@ public class CoffeeShopRequestDTO {
     @ValidPhoneNumber(message = "Invalid phone number format provided")
     private String contactPhone;
 
+    @Size(max = 255)
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String contactEmail;

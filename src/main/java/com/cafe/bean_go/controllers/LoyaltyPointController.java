@@ -7,6 +7,7 @@ import com.cafe.bean_go.services.LoyaltyPointService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +21,13 @@ public class LoyaltyPointController {
     private final LoyaltyPointService loyaltyPointService;
 
     @GetMapping("/users/{userId}/loyalty-points")
+    @PreAuthorize("#userId == principal.user.id or hasRole('ADMIN')")
     public ResponseEntity<List<LoyaltyPointResponseDTO>> getUserWallets(@PathVariable Long userId) {
         List<LoyaltyPointResponseDTO> wallets = loyaltyPointService.getUserWallets(userId);
         return ResponseEntity.ok(wallets);
     }
 
+    @PreAuthorize("hasRole('MERCHANT')")
     @PostMapping("/loyalty-points/transactions")
     public ResponseEntity<Void> addPointsAfterPurchase(@AuthenticationPrincipal CustomUserDetails currentUser, @Valid @RequestBody LoyaltyPointRequestDTO requestDTO) {
 

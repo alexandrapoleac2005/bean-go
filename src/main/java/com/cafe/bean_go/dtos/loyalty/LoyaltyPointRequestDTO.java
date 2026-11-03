@@ -1,5 +1,6 @@
 package com.cafe.bean_go.dtos.loyalty;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -21,5 +22,6 @@ public class LoyaltyPointRequestDTO {
 
     @NotNull(message = "Points to add is mandatory")
     @Min(value = 1, message = "Must add at least 1 point")
+    @Max(value = 1000, message = "Cannot add more than 1000 points at once")
     private Integer pointsToAdd;
 }

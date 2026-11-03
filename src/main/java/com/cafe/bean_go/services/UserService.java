@@ -25,7 +25,7 @@ public class UserService {
 
     @Transactional
     public void addLifetimePoints(Long userId, int pointsToAdd){
-        User userFound = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID: " + userId + " was not found"));
+        User userFound = userRepository.findByIdForUpdate(userId).orElseThrow(() -> new ResourceNotFoundException("User with ID: " + userId + " was not found"));
         userFound.setLifetimePoints(userFound.getLifetimePoints() + pointsToAdd);
 
         UserBadge newBadge = UserBadge.getBadgeForPoints(userFound.getLifetimePoints());

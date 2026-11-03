@@ -11,6 +11,7 @@ import com.cafe.bean_go.entities.MenuItem;
 import com.cafe.bean_go.entities.OperatingHours;
 import com.cafe.bean_go.entities.User;
 import com.cafe.bean_go.exceptions.CoffeeShopOwnershipException;
+import com.cafe.bean_go.exceptions.InvalidScheduleException;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
 import com.cafe.bean_go.repositories.CoffeeShopRepository;
@@ -19,10 +20,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +40,7 @@ public class CoffeeShopService {
     @Transactional(readOnly = true)
     public Page<CoffeeShopSummaryResponseDTO> getAllCoffeeShopsSummary(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
 
         Page<CoffeeShop> coffeeShopPage = coffeeShopRepository.findByIsApprovedTrue(pageable);
 
@@ -44,7 +49,9 @@ public class CoffeeShopService {
 
     @Transactional(readOnly = true)
     public CoffeeShopDetailsResponseDTO getCoffeeShopById(Long id) {
-        CoffeeShop coffeeShop = coffeeShopRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + id + " not found!"));
+        CoffeeShop coffeeShop = coffeeShopRepository.findById(id)
+                .filter(shop -> Boolean.TRUE.equals(shop.getIsApproved()))
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + id + " not found!"));
 
         return coffeeShopMapper.toDetailsDto(coffeeShop);
     }
@@ -123,7 +130,7 @@ public class CoffeeShopService {
                 .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
 
         if (Boolean.TRUE.equals(shop.getIsApproved())) {
-            throw new IllegalStateException("Coffee shop is already approved!");
+            return ;
         }
 
         shop.setIsApproved(true);
@@ -152,6 +159,8 @@ public class CoffeeShopService {
             throw new CoffeeShopOwnershipException("You do not have permission to modify the schedule for this coffee shop!");
         }
 
+        validateSchedule(scheduleRequests);
+
         shop.getOperatingHours().clear();
 
         List<OperatingHours> newSchedule = scheduleRequests.stream()
@@ -168,5 +177,19 @@ public class CoffeeShopService {
                 .map(coffeeShopMapper::toOperatingHoursDto)
                 .toList();
 
+    }
+
+    // Each day may appear only once, and the shop must close after it opens.
+    private void validateSchedule(List<OperatingHoursRequestDTO> scheduleRequests) {
+        Set<DayOfWeek> seenDays = EnumSet.noneOf(DayOfWeek.class);
+
+        for (OperatingHoursRequestDTO dto : scheduleRequests) {
+            if (!seenDays.add(dto.getDayOfWeek())) {
+                throw new InvalidScheduleException("Duplicate schedule entry for " + dto.getDayOfWeek());
+            }
+            if (!dto.getCloseTime().isAfter(dto.getOpenTime())) {
+                throw new InvalidScheduleException("Close time must be after open time for " + dto.getDayOfWeek());
+            }
+        }
     }
 }

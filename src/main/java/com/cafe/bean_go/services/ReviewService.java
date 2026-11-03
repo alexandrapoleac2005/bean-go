@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,19 +43,20 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + userId + " was not found."));
 
         CoffeeShop coffeeShop = coffeeShopRepository.findById(coffeeShopId)
+                .filter(shop -> Boolean.TRUE.equals(shop.getIsApproved()))
                 .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID: " + coffeeShopId + " was not found."));
 
         Review review = reviewMapper.toEntity(reviewRequestDTO);
         review.setUser(user);
+        review.setCoffeeShop(coffeeShop);
 
-        coffeeShop.addReview(review);
-
-        reviewRepository.save(review);
+        reviewRepository.saveAndFlush(review);
+        refreshAverageRating(coffeeShop);
     }
 
     @Transactional(readOnly = true)
     public Page<ReviewResponseDTO> getCoffeeShopReviews(Long coffeeShopId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         return reviewRepository.findByCoffeeShopId(coffeeShopId, pageable)
                 .map(reviewMapper::toResponseDto);
@@ -76,14 +78,21 @@ public class ReviewService {
         }
 
         CoffeeShop shop = review.getCoffeeShop();
-        shop.removeReview(review);
 
         reviewRepository.delete(review);
+        reviewRepository.flush();
+        refreshAverageRating(shop);
+    }
+
+    // Recomputes the average in the database instead of loading every review into memory.
+    private void refreshAverageRating(CoffeeShop shop) {
+        double average = getCoffeeShopAverageRating(shop.getId());
+        shop.setAverageRating(Math.round(average * 10.0) / 10.0);
     }
 
     @Transactional(readOnly = true)
     public Page<ReviewResponseDTO> getUserReviews(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         return reviewRepository.findByUserId(userId, pageable)
                 .map(reviewMapper::toResponseDto);

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class VoucherResponseDTO {
 
     private Long id;
+    private String code;
     private String coffeeShopName;
     private VoucherStatus status;
     private LocalDateTime generatedAt;

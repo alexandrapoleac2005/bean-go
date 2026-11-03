@@ -1,6 +1,7 @@
 package com.cafe.bean_go.services;
 
 import com.cafe.bean_go.dtos.voucher.VoucherResponseDTO;
+import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.Voucher;
 import com.cafe.bean_go.entities.enums.VoucherStatus;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,22 +28,27 @@ public class VoucherService {
 
     @Transactional(readOnly = true)
     public List<VoucherResponseDTO> getActiveVouchers(Long userId) {
-        return voucherRepository.findByUserIdAndStatus(userId, VoucherStatus.ACTIVE)
+        return voucherRepository.findUsableByUserId(userId, LocalDateTime.now())
                 .stream()
                 .map(voucherMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
 
+    // Called by the merchant at the counter with the code the customer shows them.
     @Transactional
-    public void useVoucher(Long voucherId, Long userId){
-        Voucher voucher = voucherRepository.findById(voucherId)
+    public VoucherResponseDTO redeemVoucher(String code, Long merchantId) {
+
+        String normalizedCode = code.trim().toUpperCase(Locale.ROOT);
+
+        Voucher voucher = voucherRepository.findByCodeForUpdate(normalizedCode)
                 .orElseThrow(() -> new ResourceNotFoundException("The voucher was not found."));
 
-        if(!voucher.getUser().getId().equals(userId)){
-            throw new VoucherOwnershipException("You do not have permission to use this voucher!");
+        CoffeeShop shop = voucher.getCoffeeShop();
+        if (shop == null || !shop.getMerchant().getId().equals(merchantId)) {
+            throw new VoucherOwnershipException("This voucher cannot be redeemed at your coffee shop.");
         }
 
-        if(voucher.getStatus() == VoucherStatus.USED){
+        if (voucher.getStatus() == VoucherStatus.USED) {
             throw new VoucherAlreadyUsedException("This voucher was already used");
         }
 
@@ -50,6 +57,8 @@ public class VoucherService {
         }
 
         voucher.setStatus(VoucherStatus.USED);
-        voucherRepository.save(voucher);
+
+        // Lets the merchant see which discount to apply.
+        return voucherMapper.toResponseDto(voucher);
     }
 }

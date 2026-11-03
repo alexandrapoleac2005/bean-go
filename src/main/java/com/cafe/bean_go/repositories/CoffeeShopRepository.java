@@ -18,7 +18,9 @@ public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
 
     @Query(value = "SELECT * FROM coffee_shops " +
             "WHERE is_approved = true " +
-            "AND ST_DWithin(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography, :radiusInMeters)",
+            "AND ST_DWithin(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography, :radiusInMeters) " +
+            "ORDER BY ST_Distance(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography) " +
+            "LIMIT 50",
             nativeQuery = true)
     List<CoffeeShop> findNearbyCoffeeShops(
             @Param("lat") double lat,

@@ -5,6 +5,8 @@ import com.cafe.bean_go.dtos.review.ReviewResponseDTO;
 import com.cafe.bean_go.security.CustomUserDetails;
 import com.cafe.bean_go.services.ReviewService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,8 +39,8 @@ public class ReviewController {
     @GetMapping("/coffee-shops/{coffeeShopId}/reviews")
     public ResponseEntity<Page<ReviewResponseDTO>> getCoffeeShopReviews(
             @PathVariable Long coffeeShopId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
 
         Page<ReviewResponseDTO> reviews = reviewService.getCoffeeShopReviews(coffeeShopId, page, size);
         return ResponseEntity.ok(reviews);
@@ -47,8 +49,8 @@ public class ReviewController {
     @GetMapping("/users/{userId}/reviews")
     public ResponseEntity<Page<ReviewResponseDTO>> getUserReviews(
             @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size) {
 
         Page<ReviewResponseDTO> reviews = reviewService.getUserReviews(userId, page, size);
         return ResponseEntity.ok(reviews);
@@ -58,8 +60,8 @@ public class ReviewController {
     @GetMapping("/reviews/me")
     public ResponseEntity<Page<ReviewResponseDTO>> getMyReviews(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int size
     ){
             Long realUserId = currentUser.getUser().getId();
             Page<ReviewResponseDTO> reviews = reviewService.getUserReviews(realUserId, page, size);

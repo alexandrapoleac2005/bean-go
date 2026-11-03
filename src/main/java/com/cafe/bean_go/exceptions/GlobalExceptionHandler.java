@@ -1,12 +1,18 @@
 package com.cafe.bean_go.exceptions;
 
 import com.cafe.bean_go.dtos.errors.ApiErrorResponse;
+import com.cafe.bean_go.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -54,9 +60,29 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception.getMessage(), HttpStatus.CONFLICT, httpServletRequest);
     }
 
-    @ExceptionHandler(VoucherExpiredException.class)
+    @ExceptionHandler({
+            VoucherExpiredException.class,
+            InvalidScheduleException.class
+    })
     public ResponseEntity<ApiErrorResponse> handleBadRequestExceptions(RuntimeException exception, HttpServletRequest httpServletRequest) {
         return buildErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST, httpServletRequest);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(AuthenticationException exception, HttpServletRequest httpServletRequest) {
+
+        String message;
+        Object jwtError = httpServletRequest.getAttribute(JwtAuthenticationFilter.JWT_ERROR_ATTRIBUTE);
+
+        if (jwtError != null) {
+            message = jwtError.toString();
+        } else if (exception instanceof BadCredentialsException) {
+            message = "Invalid email or password.";
+        } else {
+            message = "Authentication is required to access this resource.";
+        }
+
+        return buildErrorResponse(message, HttpStatus.UNAUTHORIZED, httpServletRequest);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -70,4 +96,21 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST, httpServletRequest);
     }
 
+    // Thrown when validation annotations sit directly on controller parameters,
+    // e.g. List<@Valid OperatingHoursRequestDTO>.
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodValidationExceptions(
+            HandlerMethodValidationException exception, HttpServletRequest httpServletRequest) {
+
+        String errorMessage = exception.getAllErrors().stream()
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+
+        return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST, httpServletRequest);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException exception, HttpServletRequest httpServletRequest) {
+        return buildErrorResponse("Data integrity violation occurred.", HttpStatus.CONFLICT, httpServletRequest);
+    }
 }
