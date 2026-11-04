@@ -27,5 +27,6 @@ public class MenuItemRequestDTO {
     @Digits(integer = 8, fraction = 2)
     private BigDecimal price;
 
+    @Size(max =  1000)
     private String description;
 }

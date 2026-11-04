@@ -16,13 +16,13 @@ import java.util.Optional;
 public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
     Page<CoffeeShop> findByIsApprovedTrue(Pageable pageable);
 
-    @Query(value = "SELECT * FROM coffee_shops " +
+    @Query(value = "SELECT id FROM coffee_shops " +
             "WHERE is_approved = true " +
             "AND ST_DWithin(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography, :radiusInMeters) " +
             "ORDER BY ST_Distance(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography) " +
             "LIMIT 50",
             nativeQuery = true)
-    List<CoffeeShop> findNearbyCoffeeShops(
+    List<Long> findNearbyCoffeeShopIds(
             @Param("lat") double lat,
             @Param("lng") double lng,
             @Param("radiusInMeters") double radiusInMeters

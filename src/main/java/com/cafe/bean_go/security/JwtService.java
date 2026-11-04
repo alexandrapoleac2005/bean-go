@@ -33,24 +33,12 @@ public class JwtService {
         this.signInKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    /**
-     * Verifies the signature and expiration, then returns the claims.
-     * Throws ExpiredJwtException / JwtException if the token is not valid.
-     */
     public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(signInKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        return claimsResolver.apply(parseClaims(token));
     }
 
     public String generateToken(UserDetails userDetails) {

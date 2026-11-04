@@ -18,12 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdForUpdate(@Param("id") Long id);
 
-    Optional<User> findByEmail(String email);
-
-    boolean existsByEmail(String email);
-
     boolean existsByEmailIgnoreCase(String email);
 
     boolean existsByIdAndRole(Long id, Role role);
+
     Optional<User> findByEmailIgnoreCase(String email);
 }

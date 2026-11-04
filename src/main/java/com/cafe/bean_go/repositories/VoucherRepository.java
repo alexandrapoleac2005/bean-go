@@ -15,8 +15,6 @@ import java.util.Optional;
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
-    List<Voucher> findByUserId(Long userId);
-
     // Locks the row so the same code can't be redeemed twice at the same moment.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT v FROM Voucher v WHERE v.code = :code")

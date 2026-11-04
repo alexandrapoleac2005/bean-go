@@ -40,7 +40,6 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/coffee-shops/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

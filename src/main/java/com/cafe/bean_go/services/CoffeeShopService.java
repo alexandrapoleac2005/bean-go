@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -117,9 +118,12 @@ public class CoffeeShopService {
     @Transactional(readOnly = true)
     public List<CoffeeShopSummaryResponseDTO> getNearbyCoffeeShops(double lat, double lng, double radiusInMeters) {
 
-        List<CoffeeShop> nearbyShops = coffeeShopRepository.findNearbyCoffeeShops(lat, lng, radiusInMeters);
+        List<Long> ids = coffeeShopRepository.findNearbyCoffeeShopIds(lat, lng, radiusInMeters);
+        Map<Long, CoffeeShop> byId = coffeeShopRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(CoffeeShop::getId, s -> s));
 
-        return nearbyShops.stream()
+        return ids.stream()
+                .map(byId::get)
                 .map(coffeeShopMapper::toSummaryDto)
                 .collect(Collectors.toList());
     }

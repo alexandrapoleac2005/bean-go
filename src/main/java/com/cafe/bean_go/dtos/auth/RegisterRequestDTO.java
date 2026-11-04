@@ -28,6 +28,6 @@ public class RegisterRequestDTO {
     private String email;
 
     @NotBlank(message = "The password is mandatory")
-    @Size(min = 6, max = 72, message = "The password must be at least 6 characters")
+    @Size(min = 6, max = 72, message = "The password must be between 6 and 72 characters long")
     private String password;
 }

@@ -7,12 +7,16 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -42,7 +46,8 @@ public class GlobalExceptionHandler {
             FavoriteOwnershipException.class,
             ReviewOwnershipException.class,
             VoucherOwnershipException.class,
-            CoffeeShopOwnershipException.class
+            CoffeeShopOwnershipException.class,
+            AccessDeniedException.class
     })
     public ResponseEntity<ApiErrorResponse> handleOwnershipExceptions(RuntimeException exception, HttpServletRequest httpServletRequest) {
 
@@ -62,9 +67,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             VoucherExpiredException.class,
-            InvalidScheduleException.class
+            InvalidScheduleException.class,
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
     })
-    public ResponseEntity<ApiErrorResponse> handleBadRequestExceptions(RuntimeException exception, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ApiErrorResponse> handleBadRequestExceptions(Exception exception, HttpServletRequest httpServletRequest) {
         return buildErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST, httpServletRequest);
     }
 
