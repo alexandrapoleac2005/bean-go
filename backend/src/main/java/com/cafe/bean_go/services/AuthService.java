@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,10 +46,9 @@ public class AuthService {
                 .badge(UserBadge.ROOKIE)
                 .build();
 
-        userRepository.save(user);
+        User userSaved = userRepository.save(user);
 
-        String jwtToken = jwtService.generateToken(new CustomUserDetails(user));
-        return AuthResponseDTO.builder().token(jwtToken).build();
+        return AuthResponseDTO.builder().token(issueToken(userSaved)).build();
     }
 
     public AuthResponseDTO login(LoginRequestDTO request) {
@@ -58,6 +58,14 @@ public class AuthService {
 
 
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-        return AuthResponseDTO.builder().token(jwtService.generateToken(principal)).build();
+        return AuthResponseDTO.builder().token(issueToken(principal.getUser())).build();
     }
+
+    private String issueToken(User userSaved) {
+        Map<String, Object> claims = Map.of(
+                "userId", userSaved.getId(),
+                "role", userSaved.getRole().name());
+        return jwtService.generateToken(claims, new CustomUserDetails(userSaved));
+    }
+
 }

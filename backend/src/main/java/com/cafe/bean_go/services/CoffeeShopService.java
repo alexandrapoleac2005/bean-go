@@ -1,20 +1,18 @@
 package com.cafe.bean_go.services;
 
-import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
-import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopRequestDTO;
-import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
+import com.cafe.bean_go.dtos.coffeeshop.*;
+import com.cafe.bean_go.dtos.facility.FacilityResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
 import com.cafe.bean_go.dtos.schedule.OperatingHoursRequestDTO;
 import com.cafe.bean_go.dtos.schedule.OperatingHoursResponseDTO;
-import com.cafe.bean_go.entities.CoffeeShop;
-import com.cafe.bean_go.entities.MenuItem;
-import com.cafe.bean_go.entities.OperatingHours;
-import com.cafe.bean_go.entities.User;
+import com.cafe.bean_go.entities.*;
+import com.cafe.bean_go.exceptions.CoffeeShopAlreadyApprovedException;
 import com.cafe.bean_go.exceptions.CoffeeShopOwnershipException;
 import com.cafe.bean_go.exceptions.InvalidScheduleException;
 import com.cafe.bean_go.exceptions.ResourceNotFoundException;
 import com.cafe.bean_go.mappers.CoffeeShopMapper;
 import com.cafe.bean_go.repositories.CoffeeShopRepository;
+import com.cafe.bean_go.repositories.FacilityRepository;
 import com.cafe.bean_go.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +32,7 @@ public class CoffeeShopService {
     private final CoffeeShopRepository coffeeShopRepository;
     private final CoffeeShopMapper coffeeShopMapper;
     private final UserRepository userRepository;
+    private final FacilityRepository facilityRepository;
 
     @Transactional(readOnly = true)
     public Page<CoffeeShopSummaryResponseDTO> getAllCoffeeShopsSummary(int page, int size) {
@@ -140,6 +136,74 @@ public class CoffeeShopService {
         shop.setIsApproved(true);
     }
 
+    @Transactional(readOnly = true)
+    public List<MerchantCoffeeShopResponseDTO> getMerchantCoffeeShops(Long merchantId) {
+        return coffeeShopRepository.findByMerchantIdOrderByIdAsc(merchantId).stream()
+                .map(coffeeShopMapper::toMerchantDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CoffeeShopDetailsResponseDTO getMerchantCoffeeShop(Long coffeeShopId, Long merchantId){
+        return coffeeShopMapper.toDetailsDto(findOwnedCoffeeShop(coffeeShopId, merchantId));
+    }
+
+    @Transactional
+    public CoffeeShopDetailsResponseDTO updateCoffeeShop(Long coffeeShopId, Long merchantId, CoffeeShopUpdateRequestDTO coffeeShopUpdateRequestDTO) {
+
+        CoffeeShop shop = findOwnedCoffeeShop(coffeeShopId, merchantId);
+        List<Facility> facilities = facilityRepository.findAllById(coffeeShopUpdateRequestDTO.getFacilityIds());
+        if (facilities.size() != coffeeShopUpdateRequestDTO.getFacilityIds().size()) {
+            throw new ResourceNotFoundException("One or more facilities not found!");
+        }
+
+        shop.setName(coffeeShopUpdateRequestDTO.getName());
+        shop.setAddress(coffeeShopUpdateRequestDTO.getAddress());
+        shop.setDescription(coffeeShopUpdateRequestDTO.getDescription());
+        shop.setContactEmail(coffeeShopUpdateRequestDTO.getContactEmail());
+        shop.setContactPhone(coffeeShopUpdateRequestDTO.getContactPhone());
+        shop.setLocation(coffeeShopMapper.toPoint(coffeeShopUpdateRequestDTO.getLat(), coffeeShopUpdateRequestDTO.getLng()));
+
+        shop.getFacilities().clear();
+        shop.getFacilities().addAll(new HashSet<>(facilities));
+
+        return coffeeShopMapper.toDetailsDto(shop);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FacilityResponseDTO> getAllFacilities() {
+        return facilityRepository.findAll(Sort.by("name")).stream()
+                .map(coffeeShopMapper::toFacilityDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PendingCoffeeShopResponseDTO> getPendingCoffeeShops(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        return coffeeShopRepository.findPending(pageable).map(coffeeShopMapper::toPendingDto);
+    }
+
+    @Transactional(readOnly = true)
+    public CoffeeShopDetailsResponseDTO getPendingCoffeeShop(Long coffeeShopId) {
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .filter(s -> !Boolean.TRUE.equals(s.getIsApproved()))
+                .orElseThrow(() -> new ResourceNotFoundException("Pending coffee shop with ID "+ coffeeShopId + " not found!"));
+        return coffeeShopMapper.toDetailsDto(shop);
+    }
+
+    @Transactional
+    public void rejectCoffeeShop(Long coffeeShopId) {
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+
+        if (Boolean.TRUE.equals(shop.getIsApproved())) {
+            throw new CoffeeShopAlreadyApprovedException(
+                    "Coffee shop with ID " + coffeeShopId + " is already approved and can't be denied.");
+        }
+
+        coffeeShopRepository.delete(shop);
+    }
+
     @Transactional
     public CoffeeShopDetailsResponseDTO createCoffeeShop(Long merchantId, CoffeeShopRequestDTO requestDTO) {
 
@@ -183,7 +247,6 @@ public class CoffeeShopService {
 
     }
 
-    // Each day may appear only once, and the shop must close after it opens.
     private void validateSchedule(List<OperatingHoursRequestDTO> scheduleRequests) {
         Set<DayOfWeek> seenDays = EnumSet.noneOf(DayOfWeek.class);
 
@@ -195,5 +258,15 @@ public class CoffeeShopService {
                 throw new InvalidScheduleException("Close time must be after open time for " + dto.getDayOfWeek());
             }
         }
+    }
+
+    private CoffeeShop findOwnedCoffeeShop(Long coffeeShopId, Long merchantId) {
+        CoffeeShop shop = coffeeShopRepository.findById(coffeeShopId)
+                .orElseThrow(() -> new ResourceNotFoundException("Coffee shop with ID " + coffeeShopId + " not found!"));
+
+        if (!shop.getMerchant().getId().equals(merchantId)) {
+            throw new CoffeeShopOwnershipException("You do not have permission to modify this coffee shop!");
+        }
+        return shop;
     }
 }

@@ -58,7 +58,8 @@ public class GlobalExceptionHandler {
             FavoriteAlreadyExistsException.class,
             ReviewAlreadyExistsException.class,
             VoucherAlreadyUsedException.class,
-            EmailAlreadyExistsException.class
+            EmailAlreadyExistsException.class,
+            CoffeeShopAlreadyApprovedException.class
     })
     public ResponseEntity<ApiErrorResponse> handleConflictExceptions(RuntimeException exception, HttpServletRequest httpServletRequest){
 

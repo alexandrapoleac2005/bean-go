@@ -7,6 +7,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
 import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopSummaryResponseDTO;
+import com.cafe.bean_go.dtos.coffeeshop.MerchantCoffeeShopResponseDTO;
+import com.cafe.bean_go.dtos.coffeeshop.PendingCoffeeShopResponseDTO;
 import com.cafe.bean_go.dtos.facility.FacilityResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemResponseDTO;
 import com.cafe.bean_go.dtos.menu.MenuItemRequestDTO;
@@ -15,6 +17,7 @@ import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.Facility;
 import com.cafe.bean_go.entities.MenuItem;
 import com.cafe.bean_go.entities.OperatingHours;
+import com.cafe.bean_go.entities.User;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,6 +33,29 @@ public interface CoffeeShopMapper {
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
     @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
     CoffeeShopSummaryResponseDTO toSummaryDto(CoffeeShop coffeeShop);
+
+    @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
+    @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
+    @Mapping(source = "merchant.id", target = "merchantId")
+    @Mapping(source = "merchant.email", target = "merchantEmail")
+    @Mapping(source = "merchant", target = "merchantName", qualifiedByName = "fullName")
+    PendingCoffeeShopResponseDTO toPendingDto(CoffeeShop coffeeShop);
+
+    @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
+    @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")
+    @Mapping(target = "approved", expression = "java(Boolean.TRUE.equals(coffeeShop.getIsApproved()))")
+    MerchantCoffeeShopResponseDTO toMerchantDto(CoffeeShop coffeeShop);
+
+    @Named("fullName")
+    default String fullName(User user) {
+        if (user == null) {
+            return null;
+        }
+        String first = user.getFirstName() == null ? "" : user.getFirstName();
+        String last = user.getLastName() == null ? "" : user.getLastName();
+        String name = (first + " " + last).trim();
+        return name.isEmpty() ? null : name;
+    }
 
     @Mapping(source = "location", target = "latitude", qualifiedByName = "getLatitude")
     @Mapping(source = "location", target = "longitude", qualifiedByName = "getLongitude")

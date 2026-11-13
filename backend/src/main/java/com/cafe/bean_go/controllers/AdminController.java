@@ -1,6 +1,9 @@
 package com.cafe.bean_go.controllers;
 
+import com.cafe.bean_go.dtos.coffeeshop.CoffeeShopDetailsResponseDTO;
+import com.cafe.bean_go.dtos.coffeeshop.PendingCoffeeShopResponseDTO;
 import com.cafe.bean_go.dtos.loyalty.PointTransactionResponseDTO;
+import com.cafe.bean_go.services.CoffeeShopService;
 import com.cafe.bean_go.services.PointTransactionService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -9,7 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +28,25 @@ import java.time.LocalDateTime;
 public class AdminController {
 
     private final PointTransactionService pointTransactionService;
+    private final CoffeeShopService coffeeShopService;
+
+    @GetMapping("/coffee-shops/pending")
+    public ResponseEntity<Page<PendingCoffeeShopResponseDTO>> getPendingCoffeeShops(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        return ResponseEntity.ok(coffeeShopService.getPendingCoffeeShops(page, size));
+    }
+
+    @GetMapping("/coffee-shops/pending/{id}")
+    public ResponseEntity<CoffeeShopDetailsResponseDTO> getPendingCoffeeShop(@PathVariable Long id) {
+        return ResponseEntity.ok(coffeeShopService.getPendingCoffeeShop(id));
+    }
+
+    @DeleteMapping("/coffee-shops/pending/{id}")
+    public ResponseEntity<Void> rejectCoffeeShop(@PathVariable Long id) {
+        coffeeShopService.rejectCoffeeShop(id);
+        return ResponseEntity.noContent().build();
+    }
 
     @GetMapping("/point-transactions")
     public ResponseEntity<Page<PointTransactionResponseDTO>> getPointTransactions(

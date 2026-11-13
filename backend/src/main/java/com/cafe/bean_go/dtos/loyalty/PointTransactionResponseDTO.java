@@ -18,9 +18,11 @@ public class PointTransactionResponseDTO {
     private Integer points;
 
     private Long merchantId;
+    private String merchantName;
     private String merchantEmail;
 
     private Long customerId;
+    private String customerName;
     private String customerEmail;
 
     private Long coffeeShopId;

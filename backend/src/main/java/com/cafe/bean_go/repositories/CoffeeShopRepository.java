@@ -16,6 +16,10 @@ import java.util.Optional;
 public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
     Page<CoffeeShop> findByIsApprovedTrue(Pageable pageable);
 
+    @EntityGraph(attributePaths = {"merchant"})
+    @Query("SELECT c FROM CoffeeShop c WHERE c.isApproved = false OR c.isApproved IS NULL")
+    Page<CoffeeShop> findPending(Pageable pageable);
+
     @Query(value = "SELECT id FROM coffee_shops " +
             "WHERE is_approved = true " +
             "AND ST_DWithin(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography, :radiusInMeters) " +
@@ -28,7 +32,7 @@ public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
             @Param("radiusInMeters") double radiusInMeters
     );
 
-    List<CoffeeShop> findByMerchantId(Long merchantId);
+    List<CoffeeShop> findByMerchantIdOrderByIdAsc(Long merchantId);
 
     @EntityGraph(attributePaths = {"facilities"})
     Optional<CoffeeShop> findById(Long id);

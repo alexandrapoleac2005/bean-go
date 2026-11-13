@@ -1,6 +1,7 @@
 package com.cafe.bean_go.services;
 
 import com.cafe.bean_go.dtos.loyalty.LoyaltyPointResponseDTO;
+import com.cafe.bean_go.dtos.loyalty.PointsAwardResponseDTO;
 import com.cafe.bean_go.entities.CoffeeShop;
 import com.cafe.bean_go.entities.LoyaltyPoint;
 import com.cafe.bean_go.entities.PointTransaction;
@@ -60,7 +61,16 @@ public class LoyaltyPointService {
     }
 
     @Transactional
-    public void addPointsAfterPurchase(Long loggedInMerchantId, Long userId, Long coffeeShopId, int pointsToAdd) {
+    public PointsAwardResponseDTO addPointsAfterPurchase(Long loggedInMerchantId, Long requestedUserId, String customerEmail,
+                                                         Long coffeeShopId, int pointsToAdd) {
+
+        // The counter usually knows the customer's email, not their ID.
+        final Long userId = requestedUserId != null
+                ? requestedUserId
+                : userRepository.findByEmailIgnoreCase(customerEmail == null ? "" : customerEmail.trim())
+                        .filter(user -> user.getRole() == Role.USER)
+                        .map(User::getId)
+                        .orElseThrow(() -> new ResourceNotFoundException("No customer account with that email."));
 
         CoffeeShop coffeeShop = coffeeShopRepository.findById(coffeeShopId)
                 .filter(shop -> Boolean.TRUE.equals(shop.getIsApproved()))
@@ -88,10 +98,12 @@ public class LoyaltyPointService {
         long activeVouchersCount = voucherRepository.countUsableByUserIdAndCoffeeShopId(
                 userId, coffeeShopId, LocalDateTime.now());
 
+        int vouchersIssued = 0;
         while (wallet.getPoints() >= pointsForVoucher && activeVouchersCount < maxActiveVouchers) {
             generateVoucher(wallet.getUser(), wallet.getCoffeeShop());
             wallet.setPoints(wallet.getPoints() - pointsForVoucher);
             activeVouchersCount++;
+            vouchersIssued++;
         }
 
         loyaltyPointRepository.save(wallet);
@@ -102,6 +114,16 @@ public class LoyaltyPointService {
                 .merchant(userRepository.getReferenceById(loggedInMerchantId))
                 .points(pointsToAdd)
                 .build());
+
+        User customer = wallet.getUser();
+        return PointsAwardResponseDTO.builder()
+                .customerName((customer.getFirstName() + " " + customer.getLastName()).trim())
+                .customerEmail(customer.getEmail())
+                .coffeeShopName(coffeeShop.getName())
+                .pointsAdded(pointsToAdd)
+                .walletPoints(wallet.getPoints())
+                .vouchersIssued(vouchersIssued)
+                .build();
     }
 
     private LoyaltyPoint createNewWallet(Long userId, Long coffeeShopId) {
