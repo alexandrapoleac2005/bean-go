@@ -1,0 +1,40 @@
+package com.cafe.bean_go.repositories;
+
+import com.cafe.bean_go.entities.CoffeeShop;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface CoffeeShopRepository extends JpaRepository<CoffeeShop, Long> {
+    Page<CoffeeShop> findByIsApprovedTrue(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"merchant"})
+    @Query("SELECT c FROM CoffeeShop c WHERE c.isApproved = false OR c.isApproved IS NULL")
+    Page<CoffeeShop> findPending(Pageable pageable);
+
+    @Query(value = "SELECT id FROM coffee_shops " +
+            "WHERE is_approved = true " +
+            "AND ST_DWithin(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography, :radiusInMeters) " +
+            "ORDER BY ST_Distance(location\\:\\:geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)\\:\\:geography) " +
+            "LIMIT 50",
+            nativeQuery = true)
+    List<Long> findNearbyCoffeeShopIds(
+            @Param("lat") double lat,
+            @Param("lng") double lng,
+            @Param("radiusInMeters") double radiusInMeters
+    );
+
+    List<CoffeeShop> findByMerchantIdOrderByIdAsc(Long merchantId);
+
+    @EntityGraph(attributePaths = {"facilities"})
+    Optional<CoffeeShop> findById(Long id);
+
+}
